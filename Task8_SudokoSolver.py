@@ -70,21 +70,38 @@ def solve_sudoku_gui():
     for i in range(9):
         row = []
         for j in range(9):
-            value = int(entry_list[i][j].get())
+            value = int(entry_list[i][j].get() or 0)
             row.append(value)
         board.append(row)
 
-    # Solve the Sudoku puzzle
-    if solve_sudoku(board):
-        # Update the GUI with the solution
+    def update_gui(board):
         for i in range(9):
             for j in range(9):
                 if entry_list[i][j].get() == "0":
                     entry_list[i][j].config(fg="blue")
                 entry_list[i][j].delete(0, tk.END)
                 entry_list[i][j].insert(tk.END, str(board[i][j]))
+        root.update_idletasks()
+        root.update()
+
+    def solve_sudoku(board):
+        for j in range(9):
+            for i in range(9):
+                if board[i][j] == 0:
+                    for num in range(1, 10):
+                        if is_valid(board, i, j, num):
+                            board[i][j] = num
+                            update_gui(board)
+                            root.after(50)  # pause for 50ms
+                            if solve_sudoku(board):
+                                return True
+                            board[i][j] = 0
+                    return False
+        return True
+
+    if solve_sudoku(board):
+        messagebox.showinfo("Solution Found", "The Sudoku puzzle has been solved.")
     else:
-        # Display a message if no solution exists
         messagebox.showinfo("No Solution", "No solution exists for the given Sudoku puzzle.")
 
 def clear_board():
